@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sylva Institute of Technology — Student Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #E1F5EE;
+    --blue-light: #E6F1FB;
+    --blue: #185FA5;
+    --amber-light: #FAEEDA;
+    --amber: #854F0B;
+    --purple-light: #EEEDFE;
+    --purple: #534AB7;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-dark: #A32D2D;
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --text-hint: #888;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* TOP BAR */
+  .topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { font-size: 15px; font-weight: 600; color: var(--text); }
+  .logo span { color: var(--green); }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .bell-wrap { position: relative; cursor: pointer; }
+  .bell-wrap i { font-size: 20px; color: var(--text-muted); }
+  .badge { position: absolute; top: -4px; right: -4px; width: 15px; height: 15px; background: var(--red); border-radius: 50%; font-size: 9px; color: #fff; display: flex; align-items: center; justify-content: center; }
+  .user-name { font-size: 13px; color: var(--text-muted); }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--green-dark); cursor: pointer; }
+
+  /* LAYOUT */
+  .layout { display: flex; min-height: calc(100vh - 53px); }
+
+  /* SIDEBAR */
+  .sidebar { width: 210px; flex-shrink: 0; background: var(--surface); border-right: 0.5px solid var(--border); padding: 10px 0; position: sticky; top: 53px; height: calc(100vh - 53px); overflow-y: auto; }
+  .nav-section { padding: 8px 14px 2px; font-size: 10px; font-weight: 600; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.6px; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 14px; cursor: pointer; font-size: 13px; color: var(--text-muted); border-radius: var(--radius-sm); margin: 1px 6px; transition: background 0.15s; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--green-light); color: var(--green-dark); font-weight: 600; }
+  .nav-item i { font-size: 17px; flex-shrink: 0; }
+
+  /* CONTENT */
+  .content { flex: 1; padding: 22px; min-width: 0; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* WELCOME BANNER */
+  .welcome { background: linear-gradient(135deg, var(--green-dark), var(--green)); border-radius: var(--radius); padding: 22px 26px; color: #fff; margin-bottom: 18px; }
+  .welcome .date { font-size: 12px; opacity: 0.75; margin-bottom: 4px; }
+  .welcome h2 { font-size: 20px; font-weight: 600; margin-bottom: 3px; }
+  .welcome p { font-size: 13px; opacity: 0.85; }
+  .welcome-chips { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .chip { background: rgba(255,255,255,0.18); border-radius: 20px; padding: 4px 13px; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+
+  /* GRIDS */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 15px 17px; }
+  .card-label { font-size: 11px; color: var(--text-hint); margin-bottom: 4px; }
+  .card-val { font-size: 24px; font-weight: 600; color: var(--text); }
+  .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .progress-bar { height: 6px; background: var(--bg); border-radius: 3px; margin-top: 9px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 3px; }
+
+  .section-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 18px 0 10px; }
+
+  /* QUICK LINKS */
+  .ql-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 18px; }
+  .ql { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 11px 8px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
+  .ql:hover { background: var(--green-light); }
+  .ql i { font-size: 22px; color: var(--green); }
+  .ql span { font-size: 11px; color: var(--text-muted); text-align: center; }
+
+  /* DEADLINE ROWS */
+  .deadline-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .deadline-row:last-child { border-bottom: none; }
+  .dl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dl-name { flex: 1; color: var(--text); }
+  .dl-date { font-size: 12px; color: var(--text-muted); }
+
+  /* MESSAGES */
+  .msg-item { display: flex; gap: 11px; padding: 10px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
+  .msg-item:last-child { border-bottom: none; }
+  .msg-av { width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--green-dark); flex-shrink: 0; }
+  .msg-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .msg-text { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .msg-time { font-size: 11px; color: var(--text-hint); margin-left: auto; flex-shrink: 0; padding-top: 2px; }
+
+  /* COURSE CARDS */
+  .course-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .course-thumb { height: 85px; display: flex; align-items: center; justify-content: center; font-size: 34px; }
+  .course-body { padding: 11px 13px; }
+  .course-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .course-meta { font-size: 11px; color: var(--text-muted); }
+  .lvl-badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 10px; font-weight: 600; margin-top: 7px; }
+  .lvl1 { background: var(--green-light); color: var(--green-dark); }
+  .lvl2 { background: var(--blue-light); color: var(--blue); }
+  .lvl3 { background: var(--amber-light); color: var(--amber); }
+  .lvl4 { background: var(--purple-light); color: var(--purple); }
+
+  /* ATTENDANCE STATUS */
+  .att-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .att-row:last-child { border-bottom: none; }
+  .att-status { width: 72px; text-align: center; padding: 3px 0; border-radius: 10px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .present { background: #EAF3DE; color: #3B6D11; }
+  .absent { background: var(--red-light); color: var(--red-dark); }
+  .late { background: var(--amber-light); color: var(--amber); }
+
+  /* GALLERY */
+  .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+  .gallery-item { border-radius: var(--radius); overflow: hidden; border: 0.5px solid var(--border); }
+  .gallery-thumb { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .gallery-info { padding: 10px 13px; background: var(--surface); }
+  .gallery-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .gallery-student { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ENROLMENT */
+  .enrol-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .step-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .step-num { width: 30px; height: 30px; border-radius: 50%; background: var(--green-light); color: var(--green-dark); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 11px; }
+  .step-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  /* BUTTONS */
+  .btn-green { background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-outline { background: transparent; border: 0.5px solid var(--border); color: var(--text); border-radius: var(--radius-sm); padding: 9px 20px; font-size: 13px; cursor: pointer; }
+  .btn-outline:hover { background: var(--bg); }
+
+  /* FORM ELEMENTS */
+  select, textarea, input[type="text"] { border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; font-size: 13px; background: var(--surface); color: var(--text); outline: none; }
+  select:focus, textarea:focus, input:focus { border-color: var(--green); }
+  textarea { width: 100%; min-height: 85px; resize: vertical; }
+
+  /* PLACEHOLDER PAGE */
+  .placeholder { padding: 30px; text-align: center; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
+  .placeholder i { font-size: 42px; color: var(--green-light); display: block; margin-bottom: 10px; }
+
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .grid2, .grid3, .grid4, .ql-grid, .gallery-grid, .enrol-steps { grid-template-columns: 1fr 1fr; }
+    .grid4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .grid2, .grid3, .grid4, .gallery-grid, .enrol-steps { grid-template-columns: 1fr; }
+    .ql-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo"><span>Sylva</span> Institute of Technology</div>
+  <div class="topbar-right">
+    <div class="bell-wrap"><i class="ti ti-bell"></i><div class="badge">3</div></div>
+    <span class="user-name" id="student-name">Chanda Mutale</span>
+    <div class="avatar" id="student-avatar">CM</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-item active" onclick="showPage('home',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item" onclick="showPage('courses',this)"><i class="ti ti-book"></i> My courses</div>
+    <div class="nav-section">Learning</div>
+    <div class="nav-item" onclick="showPage('progress',this)"><i class="ti ti-chart-bar"></i> Progress tracker</div>
+    <div class="nav-item" onclick="showPage('attendance',this)"><i class="ti ti-checkbox"></i> Attendance</div>
+    <div class="nav-item" onclick="showPage('grades',this)"><i class="ti ti-star"></i> Grades</div>
+    <div class="nav-item" onclick="showPage('calendar',this)"><i class="ti ti-calendar"></i> Calendar</div>
+    <div class="nav-item" onclick="showPage('resources',this)"><i class="ti ti-file"></i> Resources</div>
+    <div class="nav-section">Communication</div>
+    <div class="nav-item" onclick="showPage('messages',this)"><i class="ti ti-message"></i> Messages</div>
+    <div class="nav-item" onclick="showPage('support',this)"><i class="ti ti-headset"></i> Student support</div>
+    <div class="nav-section">Finance & Docs</div>
+    <div class="nav-item" onclick="showPage('payment',this)"><i class="ti ti-credit-card"></i> Payment</div>
+    <div class="nav-item" onclick="showPage('certificates',this)"><i class="ti ti-certificate"></i> Certificates</div>
+    <div class="nav-item" onclick="showPage('transcripts',this)"><i class="ti ti-clipboard"></i> Transcripts</div>
+    <div class="nav-item" onclick="showPage('glossary',this)"><i class="ti ti-book-2"></i> Glossary</div>
+    <div class="nav-item" onclick="showPage('apprentices',this)"><i class="ti ti-tools"></i> Apprentices</div>
+    <div class="nav-section">Community</div>
+    <div class="nav-item" onclick="showPage('gallery',this)"><i class="ti ti-photo"></i> Student gallery</div>
+    <div class="nav-item" onclick="showPage('trainers',this)"><i class="ti ti-users"></i> Trainers & profile</div>
+    <div class="nav-section">Admin</div>
+    <div class="nav-item" onclick="showPage('enrolment',this)"><i class="ti ti-user-plus"></i> Admission & enrolment</div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+      <div class="welcome">
+        <div class="date" id="today-date"></div>
+        <h2 id="welcome-msg">Welcome back, Chanda! 👋</h2>
+        <p>You have 2 assignments due this week and 1 upcoming exam.</p>
+        <div class="welcome-chips">
+          <div class="chip"><i class="ti ti-book"></i> 2 active courses</div>
+          <div class="chip"><i class="ti ti-clock"></i> 14 hrs logged</div>
+          <div class="chip"><i class="ti ti-award"></i> Level 2 student</div>
+        </div>
+      </div>
+      <div class="grid4" style="margin-bottom:18px">
+        <div class="card"><div class="card-label">Modules done</div><div class="card-val">8/14</div><div class="progress-bar"><div class="progress-fill" style="width:57%"></div></div></div>
+        <div class="card"><div class="card-label">Attendance</div><div class="card-val">87%</div><div class="card-sub">12 sessions attended</div></div>
+        <div class="card"><div class="card-label">Current grade</div><div class="card-val">B+</div><div class="card-sub">78/100 average</div></div>
+        <div class="card"><div class="card-label">Next deadline</div><div class="card-val" style="font-size:15px">Mon 19 May</div><div class="card-sub">Practical task due</div></div>
+      </div>
+      <div class="section-title" style="margin-top:0">Quick links</div>
+      <div class="ql-grid">
+        <div class="ql" onclick="showPage('attendance',null)"><i class="ti ti-checkbox"></i><span>Attendance</span></div>
+        <div class="ql" onclick="showPage('grades',null)"><i class="ti ti-star"></i><span>Grades</span></div>
+        <div class="ql" onclick="showPage('calendar',null)"><i class="ti ti-calendar"></i><span>Calendar</span></div>
+        <div class="ql" onclick="showPage('payment',null)"><i class="ti ti-credit-card"></i><span>Payment</span></div>
+        <div class="ql" onclick="showPage('resources',null)"><i class="ti ti-file"></i><span>Resources</span></div>
+        <div class="ql" onclick="showPage('certificates',null)"><i class="ti ti-certificate"></i><span>Certificates</span></div>
+        <div class="ql" onclick="showPage('transcripts',null)"><i class="ti ti-clipboard"></i><span>Transcripts</span></div>
+        <div class="ql" onclick="showPage('glossary',null)"><i class="ti ti-book-2"></i><span>Glossary</span></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="section-title">Upcoming deadlines</div>
+          <div class="card">
+            <div class="deadline-row"><div class="dl-dot" style="background:#E24B4A"></div><div class="dl-name">Practical task — Food Production</div><div class="dl-date">19 May</div></div>
+            <div class="deadline-row"><div class="dl-dot" style="background:#EF9F27"></div><div class="dl-name">Quiz — Customer Care</div><div class="dl-date">22 May</div></div>
+            <div class="deadline-row"><div class="dl-dot" style="background:#1D9E75"></div><div class="dl-name">Project report — Hospitality</div><div class="dl-date">30 May</div></div>
+            <div class="deadline-row"><div class="dl-dot" style="background:#185FA5"></div><div class="dl-name">End of module exam — F&B</div><div class="dl-date">5 Jun</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Recent messages</div>
+          <div class="card">
+            <div class="msg-item"><div class="msg-av">TM</div><div><div class="msg-name">Trainer Mwale</div><div class="msg-text">Your practical assessment is scheduled for Friday.</div></div><div class="msg-time">9:12</div></div>
+            <div class="msg-item"><div class="msg-av" style="background:var(--blue-light);color:var(--blue)">AD</div><div><div class="msg-name">Admin</div><div class="msg-text">Your Level 2 certificate is ready to download.</div></div><div class="msg-time">Tue</div></div>
+            <div class="msg-item"><div class="msg-av" style="background:var(--amber-light);color:var(--amber)">TS</div><div><div class="msg-name">Tutor Support</div><div class="msg-text">Reminder: feedback session tomorrow at 2pm.</div></div><div class="msg-time">Mon</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY COURSES -->
+    <div id="page-courses" class="page">
+      <div class="section-title" style="margin-top:0">My enrolled courses</div>
+      <div class="grid3">
+        <div class="course-card"><div class="course-thumb" style="background:#E1F5EE">🍳</div><div class="course-body"><div class="course-title">Food Production</div><div class="course-meta">6 months · Module 3 of 8</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:38%"></div></div><span class="lvl-badge lvl2">Level 2</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#E6F1FB">🍽️</div><div class="course-body"><div class="course-title">Food & Beverage</div><div class="course-meta">6 months · Module 2 of 8</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:25%"></div></div><span class="lvl-badge lvl2">Level 2</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#FAEEDA">🏨</div><div class="course-body"><div class="course-title">General Hospitality</div><div class="course-meta">6 months · Module 5 of 8</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:62%"></div></div><span class="lvl-badge lvl2">Level 2</span></div></div>
+      </div>
+      <div class="section-title">Available courses</div>
+      <div class="grid3">
+        <div class="course-card"><div class="course-thumb" style="background:#EEEDFE">👗</div><div class="course-body"><div class="course-title">Fashion Design & Textile</div><div class="course-meta">6 months · Not enrolled</div><span class="lvl-badge lvl4">Level 2 / Craft</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#EAF3DE">🌱</div><div class="course-body"><div class="course-title">Horticulture</div><div class="course-meta">3 months · Not enrolled</div><span class="lvl-badge lvl1">Level 3</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#FAECE7">💼</div><div class="course-body"><div class="course-title">Entrepreneurship</div><div class="course-meta">3 months · Not enrolled</div><span class="lvl-badge lvl1">Level 3</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#E1F5EE">🎉</div><div class="course-body"><div class="course-title">Event Management</div><div class="course-meta">3 months · Not enrolled</div><span class="lvl-badge lvl1">Level 3</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#FAEEDA">🏠</div><div class="course-body"><div class="course-title">Housekeeping</div><div class="course-meta">3 months · Not enrolled</div><span class="lvl-badge lvl1">Level 3</span></div></div>
+        <div class="course-card"><div class="course-thumb" style="background:#E6F1FB">🌾</div><div class="course-body"><div class="course-title">Food Processing</div><div class="course-meta">3 months · Not enrolled</div><span class="lvl-badge lvl1">Level 3</span></div></div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div id="page-progress" class="page">
+      <div class="section-title" style="margin-top:0">Progress tracker</div>
+      <div class="grid3" style="margin-bottom:16px">
+        <div class="card"><div class="card-label">Modules completed</div><div class="card-val">8/14</div><div class="progress-bar"><div class="progress-fill" style="width:57%"></div></div><div class="card-sub" style="margin-top:7px">57% overall</div></div>
+        <div class="card"><div class="card-label">Assignments submitted</div><div class="card-val">11/14</div><div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div><div class="card-sub" style="margin-top:7px">78% submitted</div></div>
+        <div class="card"><div class="card-label">Exams passed</div><div class="card-val">3/4</div><div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div><div class="card-sub" style="margin-top:7px">75% pass rate</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">Food Production — module breakdown</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Each module contains: lessons, PDF/slides, YouTube video, assessment, quiz, practical task, project, laboratory, resources, glossary, appendices &amp; recommended reading.</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div style="width:90px;color:var(--text-muted)">Module 1</div><div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div><div style="color:var(--green);font-size:12px;width:50px;text-align:right">Complete</div></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div style="width:90px;color:var(--text-muted)">Module 2</div><div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div><div style="color:var(--green);font-size:12px;width:50px;text-align:right">Complete</div></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div style="width:90px;color:var(--text-muted)">Module 3</div><div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div></div><div style="font-size:12px;width:50px;text-align:right;color:var(--text-hint)">60%</div></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px"><div style="width:90px;color:var(--text-muted)">Module 4</div><div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div></div><div style="font-size:12px;width:50px;text-align:right;color:var(--text-hint)">Locked</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div id="page-attendance" class="page">
+      <div class="section-title" style="margin-top:0">Attendance record</div>
+      <div class="grid3" style="margin-bottom:16px">
+        <div class="card"><div class="card-label">Overall attendance</div><div class="card-val">87%</div><div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div></div>
+        <div class="card"><div class="card-label">Sessions present</div><div class="card-val">12</div><div class="card-sub">Out of 14 total</div></div>
+        <div class="card"><div class="card-label">Sessions absent</div><div class="card-val">2</div><div class="card-sub">1 excused</div></div>
+      </div>
+      <div class="card">
+        <div class="att-row" style="font-weight:600"><div style="flex:1">Date</div><div style="width:150px">Course</div><div class="att-status">Status</div></div>
+        <div class="att-row"><div style="flex:1">Mon 12 May</div><div style="width:150px;color:var(--text-muted);font-size:12px">Food Production</div><div class="att-status present">Present</div></div>
+        <div class="att-row"><div style="flex:1">Fri 9 May</div><div style="width:150px;color:var(--text-muted);font-size:12px">F&amp;B</div><div class="att-status present">Present</div></div>
+        <div class="att-row"><div style="flex:1">Wed 7 May</div><div style="width:150px;color:var(--text-muted);font-size:12px">Hospitality</div><div class="att-status absent">Absent</div></div>
+        <div class="att-row"><div style="flex:1">Mon 5 May</div><div style="width:150px;color:var(--text-muted);font-size:12px">Food Production</div><div class="att-status late">Late</div></div>
+        <div class="att-row"><div style="flex:1">Fri 2 May</div><div style="width:150px;color:var(--text-muted);font-size:12px">F&amp;B</div><div class="att-status present">Present</div></div>
+      </div>
+    </div>
+
+    <!-- GRADES -->
+    <div id="page-grades" class="page">
+      <div class="section-title" style="margin-top:0">Grades</div>
+      <div class="card">
+        <div class="att-row" style="font-weight:600"><div style="flex:1">Assessment</div><div style="width:130px">Course</div><div style="width:70px;text-align:center">Score</div><div style="width:70px;text-align:center">Grade</div></div>
+        <div class="att-row"><div style="flex:1">Module 1 quiz</div><div style="width:130px;color:var(--text-muted);font-size:12px">Food Production</div><div style="width:70px;text-align:center">82/100</div><div style="width:70px;text-align:center"><span class="lvl-badge lvl1">B+</span></div></div>
+        <div class="att-row"><div style="flex:1">Practical task 1</div><div style="width:130px;color:var(--text-muted);font-size:12px">Hospitality</div><div style="width:70px;text-align:center">76/100</div><div style="width:70px;text-align:center"><span class="lvl-badge lvl2">B</span></div></div>
+        <div class="att-row"><div style="flex:1">Project report</div><div style="width:130px;color:var(--text-muted);font-size:12px">F&amp;B</div><div style="width:70px;text-align:center">90/100</div><div style="width:70px;text-align:center"><span class="lvl-badge lvl1">A</span></div></div>
+        <div class="att-row"><div style="flex:1">End of module exam</div><div style="width:130px;color:var(--text-muted);font-size:12px">Food Production</div><div style="width:70px;text-align:center">68/100</div><div style="width:70px;text-align:center"><span class="lvl-badge lvl3">C+</span></div></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="page-calendar" class="page">
+      <div class="section-title" style="margin-top:0">Calendar</div>
+      <div class="card placeholder"><i class="ti ti-calendar"></i>Your assignment deadlines, exam dates, and scheduled sessions will appear here, synced from Moodle.</div>
+    </div>
+
+    <!-- RESOURCES -->
+    <div id="page-resources" class="page">
+      <div class="section-title" style="margin-top:0">Resources</div>
+      <div class="card placeholder"><i class="ti ti-file"></i>Course PDFs, YouTube video links, glossary appendices, and recommended reading — organised by module — will appear here.</div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div id="page-messages" class="page">
+      <div class="section-title" style="margin-top:0">Messages — trainer communication</div>
+      <div class="card">
+        <div class="msg-item"><div class="msg-av">TM</div><div><div class="msg-name">Trainer Mwale <span style="font-size:11px;color:var(--text-hint);font-weight:400">· Food Production</span></div><div class="msg-text">Your practical assessment is scheduled for Friday at 9am. Please bring your equipment.</div></div><div class="msg-time">Today 9:12</div></div>
+        <div class="msg-item"><div class="msg-av" style="background:var(--blue-light);color:var(--blue)">AD</div><div><div class="msg-name">Admin office</div><div class="msg-text">Your Level 2 certificate is ready to download from the certificates section.</div></div><div class="msg-time">Tue</div></div>
+        <div class="msg-item"><div class="msg-av" style="background:var(--amber-light);color:var(--amber)">TS</div><div><div class="msg-name">Tutor support</div><div class="msg-text">Reminder: group feedback session tomorrow at 2pm in Room 3.</div></div><div class="msg-time">Mon</div></div>
+      </div>
+      <div style="margin-top:16px">
+        <textarea placeholder="Write a message to your trainer..."></textarea>
+        <button class="btn-green" style="margin-top:9px">Send message</button>
+      </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div id="page-support" class="page">
+      <div class="section-title" style="margin-top:0">Student support system</div>
+      <div class="grid3">
+        <div class="card" style="text-align:center;padding:20px"><i class="ti ti-user" style="font-size:30px;color:var(--green);display:block;margin-bottom:8px"></i><div style="font-size:14px;font-weight:600;margin-bottom:5px">Tutor contact</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:13px">Connect directly with your assigned course tutor.</div><button class="btn-green" style="width:100%">Contact tutor</button></div>
+        <div class="card" style="text-align:center;padding:20px"><i class="ti ti-headset" style="font-size:30px;color:var(--blue);display:block;margin-bottom:8px"></i><div style="font-size:14px;font-weight:600;margin-bottom:5px">Feedback system</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:13px">Submit feedback on courses, trainers, or facilities.</div><button class="btn-outline" style="width:100%">Give feedback</button></div>
+        <div class="card" style="text-align:center;padding:20px"><i class="ti ti-help" style="font-size:30px;color:var(--amber);display:block;margin-bottom:8px"></i><div style="font-size:14px;font-weight:600;margin-bottom:5px">Help desk</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:13px">Raise a support ticket for admin or technical help.</div><button class="btn-outline" style="width:100%">Open ticket</button></div>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div id="page-payment" class="page">
+      <div class="section-title" style="margin-top:0">Payment</div>
+      <div class="grid2">
+        <div class="card"><div class="card-label">Outstanding balance</div><div class="card-val" style="color:var(--red)">K 2,400</div><div class="card-sub">Next instalment due 1 June</div><button class="btn-green" style="margin-top:13px;width:100%">Pay now</button></div>
+        <div class="card"><div class="card-label">Total paid this year</div><div class="card-val" style="color:var(--green)">K 4,800</div><div class="card-sub">2 of 4 instalments paid</div></div>
+      </div>
+    </div>
+
+    <!-- CERTIFICATES -->
+    <div id="page-certificates" class="page">
+      <div class="section-title" style="margin-top:0">Certificates</div>
+      <div class="card">
+        <div class="att-row" style="font-weight:600"><div style="flex:1">Document</div><div style="width:120px">Status</div><div style="width:110px"></div></div>
+        <div class="att-row"><div style="flex:1">Level 2 certificate — Food Production</div><div style="width:120px"><span class="att-status present">Ready</span></div><div style="width:110px"><button class="btn-outline" style="padding:4px 12px;font-size:12px"><i class="ti ti-download"></i> Download</button></div></div>
+        <div class="att-row"><div style="flex:1">Level 2 transcript — F&amp;B</div><div style="width:120px"><span class="att-status late">In progress</span></div><div style="width:110px"></div></div>
+        <div class="att-row"><div style="flex:1">Craft certificate — Hospitality</div><div style="width:120px"><span class="att-status absent">Pending</span></div><div style="width:110px"></div></div>
+      </div>
+    </div>
+
+    <!-- TRANSCRIPTS -->
+    <div id="page-transcripts" class="page">
+      <div class="section-title" style="margin-top:0">Transcripts</div>
+      <div class="card placeholder"><i class="ti ti-clipboard"></i>Your official academic transcripts will appear here. Completed modules are recorded and downloadable as a PDF.</div>
+    </div>
+
+    <!-- GLOSSARY -->
+    <div id="page-glossary" class="page">
+      <div class="section-title" style="margin-top:0">Glossary</div>
+      <div class="card placeholder"><i class="ti ti-book-2"></i>Key terms and definitions for all enrolled courses — organised by module — will appear here.</div>
+    </div>
+
+    <!-- APPRENTICES -->
+    <div id="page-apprentices" class="page">
+      <div class="section-title" style="margin-top:0">Apprentices</div>
+      <div class="card placeholder"><i class="ti ti-tools"></i>Apprenticeship placements, workplace logs, and supervisor contacts are managed here.</div>
+    </div>
+
+    <!-- GALLERY -->
+    <div id="page-gallery" class="page">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin:0">Student work gallery</div>
+        <select><option>All courses</option><option>Food Production</option><option>Fashion Design</option><option>Hospitality</option><option>Horticulture</option></select>
+      </div>
+      <div class="gallery-grid">
+        <div class="gallery-item"><div class="gallery-thumb" style="background:#E1F5EE">🍽️</div><div class="gallery-info"><div class="gallery-title">Plated dessert — Level 2</div><div class="gallery-student">Thandiwe M. · Food Production</div></div></div>
+        <div class="gallery-item"><div class="gallery-thumb" style="background:#EEEDFE">👗</div><div class="gallery-info"><div class="gallery-title">Embroidered evening blouse</div><div class="gallery-student">Namukolo C. · Fashion Design</div></div></div>
+        <div class="gallery-item"><div class="gallery-thumb" style="background:#EAF3DE">🌿</div><div class="gallery-info"><div class="gallery-title">Container herb garden</div><div class="gallery-student">Bupe S. · Horticulture</div></div></div>
+        <div class="gallery-item"><div class="gallery-thumb" style="background:#FAECE7">🎂</div><div class="gallery-info"><div class="gallery-title">Celebration cake — craft level</div><div class="gallery-student">Mutinta L. · Food Production</div></div></div>
+        <div class="gallery-item"><div class="gallery-thumb" style="background:#E6F1FB">🪴</div><div class="gallery-info"><div class="gallery-title">Seedling propagation tray</div><div class="gallery-student">Kafula B. · Horticulture</div></div></div>
+        <div class="gallery-item"><div class="gallery-thumb" style="background:#FAEEDA">👔</div><div class="gallery-info"><div class="gallery-title">Men's tailored jacket</div><div class="gallery-student">Chisomo D. · Fashion Design</div></div></div>
+      </div>
+    </div>
+
+    <!-- TRAINERS -->
+    <div id="page-trainers" class="page">
+      <div class="section-title" style="margin-top:0">Trainers & profiles</div>
+      <div class="card placeholder"><i class="ti ti-users"></i>Trainer bios, qualifications, and contact details for each course department will appear here.</div>
+    </div>
+
+    <!-- ENROLMENT -->
+    <div id="page-enrolment" class="page">
+      <div class="section-title" style="margin-top:0">Admission & enrolment</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px">Follow the steps below to apply, pay fees, and confirm your enrolment at Sylva Institute of Technology.</p>
+      <div class="enrol-steps">
+        <div class="step-card"><div class="step-num">1</div><div class="step-title">Apply online</div><div class="step-desc">Fill in the admission form with your personal details, course choice, and entry requirements.</div><button class="btn-green" style="margin-top:13px;width:100%">Start application</button></div>
+        <div class="step-card"><div class="step-num">2</div><div class="step-title">Course fees & payment</div><div class="step-desc">View the fee schedule for your chosen course and pay your registration or instalment online.</div><button class="btn-outline" style="margin-top:13px;width:100%">View fees</button></div>
+        <div class="step-card"><div class="step-num">3</div><div class="step-title">Entry requirements</div><div class="step-desc">Check the academic and practical entry requirements for your programme level (1–4).</div><button class="btn-outline" style="margin-top:13px;width:100%">View requirements</button></div>
+        <div class="step-card"><div class="step-num">4</div><div class="step-title">Certification & rewards</div><div class="step-desc">Understand the certification options available upon completion, including craft certificates.</div><button class="btn-outline" style="margin-top:13px;width:100%">Learn more</button></div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:11px">Download documents</div>
+        <div class="att-row"><i class="ti ti-file-pdf" style="color:var(--red);font-size:19px"></i><div style="flex:1">Admission application form</div><button class="btn-outline" style="padding:5px 13px;font-size:12px"><i class="ti ti-download"></i> Download</button></div>
+        <div class="att-row"><i class="ti ti-file-pdf" style="color:var(--red);font-size:19px"></i><div style="flex:1">Course fee schedule 2026</div><button class="btn-outline" style="padding:5px 13px;font-size:12px"><i class="ti ti-download"></i> Download</button></div>
+        <div class="att-row" style="border-bottom:none"><i class="ti ti-file-pdf" style="color:var(--red);font-size:19px"></i><div style="flex:1">Transcript request form</div><button class="btn-outline" style="padding:5px 13px;font-size:12px"><i class="ti ti-download"></i> Download</button></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+  // Set today's date
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  // Page switching
+  function showPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const pg = document.getElementById('page-' + id);
+    if (pg) pg.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) { el.classList.add('active'); return; }
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.textContent.toLowerCase().trim().includes(id.replace(/_/g,' ').toLowerCase())) n.classList.add('active');
+    });
+  }
+</script>
+</body>
+</html>
